@@ -1,0 +1,13 @@
+[
+	{
+		"Name": "starship",
+		"Summary": "The minimal, blazing-fast, and infinitely customizable prompt for any shell! https://starship.rs/",
+		"Version": "1.0",
+		"Source": "starship.mx",
+		"Dependencies": {
+			"Optional": [],
+			"Required": [ "starship" ],
+			"Platform": [ "posix" ]
+		}
+	}
+]
