@@ -7,11 +7,11 @@ https://starship.rs/
 ## Install
 
 ```shell
-murex-package: install https://github.com/orefalo/murex-module-starship.git
+murex-package install https://github.com/orefalo/murex-module-starship.git
 ```
 
 ## Update
 
 ```shell
-murex-package: update
+murex-package update
 ```
