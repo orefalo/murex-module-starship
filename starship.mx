@@ -1,6 +1,6 @@
 
 $ENV.STARSHIP_SHELL = "murex"
-$ENV.STARSHIP_SESSION_KEY = out ${rand int} | left 16
+rand int -> :str: left 16 -> export STARSHIP_SESSION_KEY
 
 event onPrompt starship=before {
     out "This is the starship prompt"
@@ -11,13 +11,13 @@ event onPrompt starship=before {
     # to be displayed by starship. Also avoids forking to run `wc`, slightly improving perf.
     #for job in $(jobs -p); do [[ $job ]] && ((NUM_JOBS++)); done
 
-    STARSHIP_CMD_STATUS=exitnum
+    exitnum -> set STARSHIP_CMD_STATUS
 
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
-        ${starship time} -> cast int -> set END_TIME
-        START_TIME = $STARSHIP_START_TIME -> cast int
-        DURATION= $END_TIME - $START_TIME
+        starship time -> cast int -> set END_TIME
+        out $STARSHIP_START_TIME -> cast int -> set START_TIME
+        $END_TIME - $START_TIME -> set DURATION
       
         out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
