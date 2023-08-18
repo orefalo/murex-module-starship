@@ -22,7 +22,7 @@ event onPrompt starship=before {
         out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
     } else {
-        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
+        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
     }
 
 }
