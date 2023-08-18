@@ -11,20 +11,22 @@ event onPrompt starship=before {
     # to be displayed by starship. Also avoids forking to run `wc`, slightly improving perf.
     #for job in $(jobs -p); do [[ $job ]] && ((NUM_JOBS++)); done
 
-      # Prepare the timer data, if needed.
+    # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
-        STARSHIP_END_TIME=$(/opt/homebrew/bin/starship time)
-        STARSHIP_DURATION=$((STARSHIP_END_TIME - STARSHIP_START_TIME))
-        PS1="$(/opt/homebrew/bin/starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS" --cmd-duration=$STARSHIP_DURATION)"
+        ${starship time} -> cast int -> set END_TIME
+        START_TIME = $STARSHIP_START_TIME -> cast int
+        DURATION= $END_TIME - $START_TIME
+
+        PS1="$(/opt/homebrew/bin/starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS" --cmd-duration=$DURATION)"
         unset STARSHIP_START_TIME
     } else {
-        PS1="$(/opt/homebrew/bin/starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS")"
+        PS1="$(starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS")"
     }
 
 }
 
 event onPrompt starship=after {
     -> set event
-    $ENV.STARSHIP_START_TIME = ${starship time}
+    ${starship time} -> cast int -> export STARSHIP_START_TIME
     out $event.Interrupt.CmdLine 
 }
