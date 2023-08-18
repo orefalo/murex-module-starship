@@ -1,1 +1,45 @@
 out "murex-module-starship TODO"
+
+
+event onPrompt starship=before {
+    out "This is the starship prompt"
+
+    local NUM_JOBS=0
+    # Evaluate the number of jobs before running the preserved prompt command, so that tools
+    # like z/autojump, which background certain jobs, do not cause spurious background jobs
+    # to be displayed by starship. Also avoids forking to run `wc`, slightly improving perf.
+    for job in $(jobs -p); do [[ $job ]] && ((NUM_JOBS++)); done
+
+      # Prepare the timer data, if needed.
+    if [[ $STARSHIP_START_TIME ]]; then
+        STARSHIP_END_TIME=$(/opt/homebrew/bin/starship time)
+        STARSHIP_DURATION=$((STARSHIP_END_TIME - STARSHIP_START_TIME))
+        PS1="$(/opt/homebrew/bin/starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS" --cmd-duration=$STARSHIP_DURATION)"
+        unset STARSHIP_START_TIME
+    else
+        PS1="$(/opt/homebrew/bin/starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS")"
+    fi
+
+
+}
+
+event onPrompt starship=after {
+    out "This will appear after you've hit [enter] on your command prompt"
+    out "...but before the command executes"
+
+
+
+# Set up the session key that will be used to store logs
+# We don't use `random [min] [max]` because it is unavailable in older versions of fish shell
+#set -gx STARSHIP_SESSION_KEY (string sub -s1 -l16 (random)(random)(random)(random)(random)0000000000000000)
+
+STARSHIP_START_TIME=$(/opt/homebrew/bin/starship time)
+
+    $ENV.STARSHIP_SESSION_KEY=rand(str 16)
+    rant int
+}
+
+#» event onPrompt echo=after { -> set event; out $event.Interrupt.CmdLine }
+#» echo hello world
+#echo hello world
+#hello world
