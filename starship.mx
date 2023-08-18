@@ -1,9 +1,11 @@
 
-$ENV.STARSHIP_SHELL = "murex"
+export STARSHIP_SHELL="murex"
 rand int -> :str: left 16 -> export STARSHIP_SESSION_KEY
 
+config set shell prompt {}
+
+
 event onPrompt starship=before {
-    out "This is the starship prompt"
 
     NUM_JOBS=0
     # Evaluate the number of jobs before running the preserved prompt command, so that tools
@@ -15,7 +17,7 @@ event onPrompt starship=before {
 
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
-        starship time -> cast int -> set END_TIME
+        datetime --in "{now}" --out "{unix}" -> cast int -> set END_TIME
         out $STARSHIP_START_TIME -> cast int -> set START_TIME
         $END_TIME - $START_TIME -> set DURATION
       
@@ -30,6 +32,6 @@ event onPrompt starship=before {
 event onPrompt starship=after {
 #    -> set event
 #    out $event.Interrupt.CmdLine 
-    ${starship time} -> cast int -> export STARSHIP_START_TIME
+    datetime --in "{now}" --out "{unix}" -> cast int -> export STARSHIP_START_TIME
     
 }
