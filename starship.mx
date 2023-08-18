@@ -5,28 +5,31 @@ $ENV.STARSHIP_SESSION_KEY = out ${rand int} | left 16
 event onPrompt starship=before {
     out "This is the starship prompt"
 
-    #local NUM_JOBS=0
+    NUM_JOBS=0
     # Evaluate the number of jobs before running the preserved prompt command, so that tools
     # like z/autojump, which background certain jobs, do not cause spurious background jobs
     # to be displayed by starship. Also avoids forking to run `wc`, slightly improving perf.
     #for job in $(jobs -p); do [[ $job ]] && ((NUM_JOBS++)); done
+
+    STARSHIP_CMD_STATUS=exitnum
 
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
         ${starship time} -> cast int -> set END_TIME
         START_TIME = $STARSHIP_START_TIME -> cast int
         DURATION= $END_TIME - $START_TIME
-
-        PS1="$(starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS" --cmd-duration=$DURATION)"
+      
+        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
     } else {
-        PS1="$(starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="${STARSHIP_PIPE_STATUS[*]}" --jobs="$NUM_JOBS")"
+        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
     }
 
 }
 
 event onPrompt starship=after {
-    -> set event
+#    -> set event
+#    out $event.Interrupt.CmdLine 
     ${starship time} -> cast int -> export STARSHIP_START_TIME
-    out $event.Interrupt.CmdLine 
+    
 }
