@@ -2,12 +2,9 @@
 export STARSHIP_SHELL="murex"
 rand int -> :str: left 16 -> export STARSHIP_SESSION_KEY
 
-config set shell prompt {}
+config set shell prompt {
 
-
-event onPrompt starship=before {
-
-    NUM_JOBS=0
+ NUM_JOBS=0
     # Evaluate the number of jobs before running the preserved prompt command, so that tools
     # like z/autojump, which background certain jobs, do not cause spurious background jobs
     # to be displayed by starship. Also avoids forking to run `wc`, slightly improving perf.
@@ -21,13 +18,17 @@ event onPrompt starship=before {
         out $STARSHIP_START_TIME -> cast int -> set START_TIME
         $END_TIME - $START_TIME -> set DURATION
       
-        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
+        printf ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
     } else {
-        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
+        printf ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
     }
 
 }
+
+
+#event onPrompt starship=before {
+#}
 
 event onPrompt starship=after {
 #    -> set event
