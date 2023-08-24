@@ -18,21 +18,14 @@ config set shell prompt {
         out $STARSHIP_START_TIME -> cast int -> set START_TIME
         $END_TIME - $START_TIME -> set DURATION
       
-        printf ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
+        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
     } else {
-        printf ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
+        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
     }
-
 }
 
-
-#event onPrompt starship=before {
-#}
-
 event onPrompt starship=after {
-#    -> set event
-#    out $event.Interrupt.CmdLine 
     datetime --in "{now}" --out "{unix}" -> cast int -> export STARSHIP_START_TIME
     
 }
