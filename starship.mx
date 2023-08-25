@@ -7,31 +7,34 @@ config set shell prompt {
     # Get the command status
     exitnum -> set STARSHIP_CMD_STATUS
 
-    # if $COLUMNS not defined
-    if { $ENV.COLUMNS > 0 } then {
-        set COLS = $ENV.COLUMNS
-    } else { 
-        try {
-            tput cols -> set COLS
-        }
-        catch {
-            set COLS 128
-        }
-    }
-
-    # how many bg jobs do we have
-    fid-list --background -> count-> set NUM_JOBS
-
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
         datetime --in "{now}" --out "{unix}" -> cast int -> set END_TIME
         out $STARSHIP_START_TIME -> cast int -> set START_TIME
         $END_TIME - $START_TIME -> set DURATION
       
-        out ${starship prompt --terminal-width=$COLS -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
+        out ${starship prompt --terminal-width=$ENV.COLS -s $STARSHIP_CMD_STATUS -j $ENV.NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
     } else {
-        out ${starship prompt --terminal-width=$COLS -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
+        out ${starship prompt --terminal-width=$ENV.COLS -s $STARSHIP_CMD_STATUS -j $ENV.NUM_JOBS}
+    }
+}
+
+event onPrompt starship=before {
+
+    # how many bg jobs do we have
+    fid-list --background -> count-> export NUM_JOBS
+
+    # if $COLUMNS not defined
+    if { $ENV.COLUMNS > 0 } then {
+        export COLS = $ENV.COLUMNS
+    } else { 
+        try {
+            tput cols -> export COLS
+        }
+        catch {
+            export COLS = 128
+        }
     }
 }
 
