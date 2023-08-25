@@ -20,8 +20,7 @@ config set shell prompt {
     }
 
     # how many bg jobs do we have
-    fid-list --jobs -> count -> set NUM_JOBS
-    NUM_JOBS = $NUM_JOBS - 1
+    fid-list --background -> count-> set NUM_JOBS
 
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
