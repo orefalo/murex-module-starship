@@ -4,13 +4,24 @@ rand int -> :str: left 16 -> export STARSHIP_SESSION_KEY
 
 config set shell prompt {
 
- NUM_JOBS=0
-    # Evaluate the number of jobs before running the preserved prompt command, so that tools
-    # like z/autojump, which background certain jobs, do not cause spurious background jobs
-    # to be displayed by starship. Also avoids forking to run `wc`, slightly improving perf.
-    #for job in $(jobs -p); do [[ $job ]] && ((NUM_JOBS++)); done
-
+    # Get the command status
     exitnum -> set STARSHIP_CMD_STATUS
+
+    # if $COLUMNS not defined
+    if { $ENV.COLUMNS > 0 } then {
+        set COLS = $ENV.COLUMNS
+    } else { 
+        try {
+            tput cols -> set COLS
+        }
+        catch {
+            set COLS 128
+        }
+    }
+
+    # how many bg jobs do we have
+    fid-list --jobs -> count -> set NUM_JOBS
+    NUM_JOBS = $NUM_JOBS - 1
 
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
@@ -18,10 +29,10 @@ config set shell prompt {
         out $STARSHIP_START_TIME -> cast int -> set START_TIME
         $END_TIME - $START_TIME -> set DURATION
       
-        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
+        out ${starship prompt --terminal-width=$COLS -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION}
         unset STARSHIP_START_TIME
     } else {
-        out ${starship prompt -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
+        out ${starship prompt --terminal-width=$COLS -s $STARSHIP_CMD_STATUS -j $NUM_JOBS}
     }
 }
 
