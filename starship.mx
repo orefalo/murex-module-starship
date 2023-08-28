@@ -1,44 +1,56 @@
 
-export STARSHIP_SHELL="murex"
-rand int -> :str: left 16 -> export STARSHIP_SESSION_KEY
+ENV.STARSHIP_SHELL="murex"
+ENV.STARSHIP_SESSION_KEY = starship(session)
 
-config set shell prompt {
+private starship_prompt {
+ 
+    # get the command status
+    STARSHIP_CMD_STATUS=exitnum()
 
-    # Get the command status
-    exitnum -> set STARSHIP_CMD_STATUS
+    cast str
+
+    # how many bg jobs do we have
+    fid-list --background -> count -> set NUM_JOBS
+
+    # if $COLUMNS is defined, use it
+    if { ENV.COLUMNS > 0 } then {
+        COLS=ENV.COLUMNS
+    } else {
+        try {
+            COLS=tput(cols)
+        }
+        catch {
+            COLS=128
+        }
+    }
 
     # Prepare the timer data, if needed.
     if { $STARSHIP_START_TIME } then {
         datetime --in "{now}" --out "{unix}" -> cast int -> set END_TIME
-        out $STARSHIP_START_TIME -> cast int -> set START_TIME
-        $END_TIME - $START_TIME -> set DURATION
+        now = datetime(--in {now} --out {unix})
+        DURATION = $now - $STARSHIP_START_TIME
       
-        out ${starship prompt --terminal-width=$ENV.COLS -s $STARSHIP_CMD_STATUS -j $ENV.NUM_JOBS -d $DURATION}
+        starship prompt --terminal-width=$COLS -s $STARSHIP_CMD_STATUS -j $NUM_JOBS -d $DURATION
         unset STARSHIP_START_TIME
     } else {
-        out ${starship prompt --terminal-width=$ENV.COLS -s $STARSHIP_CMD_STATUS -j $ENV.NUM_JOBS}
+        starship prompt --terminal-width=$COLS -s $STARSHIP_CMD_STATUS -j $NUM_JOBS
     }
 }
 
 event onPrompt starship=before {
-
-    # how many bg jobs do we have
-    fid-list --background -> count-> export NUM_JOBS
-
-    # if $COLUMNS not defined
-    if { $ENV.COLUMNS > 0 } then {
-        export COLS = $ENV.COLUMNS
-    } else { 
-        try {
-            tput cols -> export COLS
-        }
-        catch {
-            export COLS = 128
-        }
-    }
+    prompt = starship_prompt()
+    GLOBAL.STARSHIP_HINT   = $prompt[1] # hint text is first line of starship prompt
+    GLOBAL.STARSHIP_PROMPT = $prompt[2] # shell prompt is the second line
 }
 
 event onPrompt starship=after {
-    datetime --in "{now}" --out "{unix}" -> cast int -> export STARSHIP_START_TIME
-    
+    ENV.STARSHIP_START_TIME = datetime(--in {now} --out {unix})
+}
+
+config set shell hint-text-func {
+    out $STARSHIP_HINT
+}
+
+config set shell prompt {
+    out $STARSHIP_PROMPT
 }
