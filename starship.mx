@@ -17,7 +17,7 @@ private starship_prompt {
         COLS=ENV.COLUMNS
     } else {
         try {
-            COLS=tput(cols)
+            tput cols -> set COLS
         }
         catch {
             COLS=128
