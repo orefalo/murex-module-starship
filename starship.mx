@@ -44,7 +44,7 @@ event onPrompt starship=before {
 }
 
 event onPrompt starship=after {
-    ENV.STARSHIP_START_TIME = datetime(--in {now} --out {unix})
+    datetime --in {now} --out {unix} -> cast int -> set ENV.STARSHIP_START_TIME
 }
 
 config set shell hint-text-func {
